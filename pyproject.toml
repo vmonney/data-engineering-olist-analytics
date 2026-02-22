@@ -1,0 +1,23 @@
+[project]
+name = "olist-analytics"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dbt-core>=1.8.8",
+    "dbt-duckdb>=1.10.1",
+    "duckdb>=1.4.4",
+    "marimo>=0.20.1",
+    "pandas>=3.0.1",
+    "pyarrow>=23.0.1",
+    "soda-core-duckdb>=3.3.20",
+    "sqlglot>=28.10.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.2",
+    "sqlfluff>=4.0.4",
+    "sqlfluff-templater-dbt>=4.0.4",
+]

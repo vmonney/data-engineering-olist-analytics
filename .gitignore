@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Data files
+data/raw/
+data/processed/
+*.parquet
+*.db
+*.duckdb
+
+# dbt
+target/
+dbt_packages/
+logs/
+dbt_modules/
+
+# Soda
+.soda/
+
+# Marimo
+__marimo__/
+
+# Jupyter / Notebooks
+.ipynb_checkpoints/
+
+# pre-commit
+.pre-commit-cache/
+
+# Ruff
+.ruff_cache/
+
+# pytest
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# mypy
+.mypy_cache/
