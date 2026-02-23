@@ -10,7 +10,6 @@ def _():
     import duckdb
 
     con = duckdb.connect("data/olist.duckdb", read_only=True)
-
     return con, mo
 
 
@@ -100,7 +99,6 @@ def _(con, mo, raw_customers, raw_order_items, raw_orders):
         GROUP BY c.customer_state
         ORDER BY revenue DESC
         LIMIT 10;
-
         """,
         engine=con,
     )
@@ -157,6 +155,52 @@ def _(mo):
     - Notes clients bimodales : beaucoup de 5/5 et un cluster de 1/5
     - Le délai de livraison semble être le facteur n°1 d'insatisfaction
     """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Check failed tests SODA
+    """)
+    return
+
+
+@app.cell
+def _(con, mo, raw_order_items, raw_products):
+    _df = mo.sql(
+        """
+        SELECT DISTINCT
+            p.product_category_name,
+            roi.price
+        FROM raw_order_items AS roi
+        JOIN raw_products AS p
+            ON p.product_id = roi.product_id
+        WHERE roi.price > 5000
+        ORDER BY p.product_category_name;
+        """,
+        engine=con,
+    )
+    return
+
+
+@app.cell
+def _(con, mo, products_categories, raw_order_items, raw_products):
+    _df = mo.sql(
+        """
+        SELECT DISTINCT
+            pc.product_category_name_english AS product_category,
+            roi.price
+        FROM raw_order_items AS roi
+        JOIN raw_products AS p
+            ON p.product_id = roi.product_id
+        JOIN products_categories AS pc
+            ON pc.product_category_name = p.product_category_name
+        WHERE roi.price > 5000
+        ORDER BY pc.product_category_name_english;
+        """,
+        engine=con,
+    )
     return
 
 

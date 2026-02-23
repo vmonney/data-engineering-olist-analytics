@@ -17,6 +17,7 @@ TABLES = {
     "raw_products": "olist_products_dataset.csv",
     "raw_sellers": "olist_sellers_dataset.csv",
     "raw_geolocation": "olist_geolocation_dataset.csv",
+    "products_categories": "product_category_name_translation.csv",
 }
 
 for table_name, filename in TABLES.items():

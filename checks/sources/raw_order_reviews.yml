@@ -1,0 +1,6 @@
+checks for raw_order_reviews:
+  - missing_count(review_score) = 0
+  - min(review_score) >= 1
+  - max(review_score) <= 5
+  - missing_percent(review_comment_message) < 60:
+      name: "Au moins 40% des reviews ont un commentaire"

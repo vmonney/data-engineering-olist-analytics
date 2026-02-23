@@ -1,0 +1,13 @@
+checks for raw_orders:
+  - row_count between 99000 and 100000:
+      name: "Volume de commandes attendu"
+  - missing_count(order_id) = 0:
+      name: "Toutes les commandes ont un ID"
+  - duplicate_count(order_id) = 0:
+      name: "Pas de doublons de commandes"
+  - missing_count(customer_id) = 0:
+      name: "Toutes les commandes ont un client"
+  - invalid_count(order_status) = 0:
+      name: "Statuts valides uniquement"
+      valid values: [delivered, shipped, canceled, unavailable,
+                     invoiced, processing, created, approved]
