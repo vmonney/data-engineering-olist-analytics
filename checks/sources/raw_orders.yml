@@ -11,3 +11,32 @@ checks for raw_orders:
       name: "Statuts valides uniquement"
       valid values: [delivered, shipped, canceled, unavailable,
                      invoiced, processing, created, approved]
+  - delivered_orders_without_payment < 10:
+      name: "Commandes livrees sans paiement (seuil portfolio)"
+      delivered_orders_without_payment query: |
+        SELECT COUNT(*) AS delivered_orders_without_payment
+        FROM (
+          SELECT o.order_id
+          FROM raw_orders o
+          LEFT JOIN raw_order_payments p ON o.order_id = p.order_id
+          WHERE o.order_status = 'delivered'
+          GROUP BY 1
+          HAVING COUNT(p.order_id) = 0
+        )
+  - payment_item_mismatch_count < 1000:
+      name: "Ecarts paiement vs total items > 1 BRL"
+      payment_item_mismatch_count query: |
+        WITH items AS (
+          SELECT order_id, SUM(price + freight_value) AS items_total
+          FROM raw_order_items
+          GROUP BY 1
+        ),
+        payments AS (
+          SELECT order_id, SUM(payment_value) AS payment_total
+          FROM raw_order_payments
+          GROUP BY 1
+        )
+        SELECT COUNT(*) AS payment_item_mismatch_count
+        FROM items i
+        LEFT JOIN payments p ON i.order_id = p.order_id
+        WHERE ABS(i.items_total - COALESCE(p.payment_total, 0)) > 1

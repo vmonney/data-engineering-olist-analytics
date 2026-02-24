@@ -1,0 +1,11 @@
+checks for raw_customers:
+  - row_count between 99000 and 100000:
+      name: "Volume clients attendu"
+  - missing_count(customer_id) = 0:
+      name: "Tous les clients ont un customer_id"
+  - duplicate_count(customer_id) = 0:
+      name: "Pas de doublons de customer_id"
+  - missing_count(customer_unique_id) = 0:
+      name: "Tous les clients ont un customer_unique_id"
+  - missing_count(customer_state) = 0:
+      name: "Tous les clients ont un etat"

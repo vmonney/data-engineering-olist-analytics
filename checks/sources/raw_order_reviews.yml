@@ -1,6 +1,15 @@
 checks for raw_order_reviews:
-  - missing_count(review_score) = 0
-  - min(review_score) >= 1
-  - max(review_score) <= 5
+  - missing_count(review_id) = 0:
+      name: "Toutes les reviews ont un ID"
+  - duplicate_count(review_id) < 1000:
+      name: "Doublons review_id sous seuil maitrise"
+  - missing_count(order_id) = 0:
+      name: "Toutes les reviews sont rattachees a une commande"
+  - missing_count(review_score) = 0:
+      name: "Toutes les reviews ont une note"
+  - min(review_score) >= 1:
+      name: "Note minimale valide"
+  - max(review_score) <= 5:
+      name: "Note maximale valide"
   - missing_percent(review_comment_message) < 60:
       name: "Au moins 40% des reviews ont un commentaire"

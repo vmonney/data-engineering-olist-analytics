@@ -1,0 +1,9 @@
+checks for raw_sellers:
+  - row_count between 3000 and 4000:
+      name: "Volume vendeurs attendu"
+  - missing_count(seller_id) = 0:
+      name: "Tous les vendeurs ont un seller_id"
+  - duplicate_count(seller_id) = 0:
+      name: "Pas de doublons de seller_id"
+  - missing_count(seller_state) = 0:
+      name: "Tous les vendeurs ont un etat"

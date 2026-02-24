@@ -1,0 +1,11 @@
+checks for mart_customer_rfm:
+  - missing_count(customer_unique_id) = 0:
+      name: "Tous les clients marts ont un ID unique"
+  - missing_count(rfm_segment) = 0:
+      name: "Tous les clients sont segmentes"
+  - min(monetary) > 0:
+      name: "Valeur monetaire positive"
+  - invalid_count(rfm_segment) = 0:
+      name: "Segments RFM valides"
+      valid values: [Champions, Loyal Customers, New Customers,
+                     At Risk, Big Spenders Lost, Lost, Potential]

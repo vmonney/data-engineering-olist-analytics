@@ -1,0 +1,13 @@
+checks for raw_products:
+  - row_count > 30000:
+      name: "Volume produits attendu"
+  - missing_count(product_id) = 0:
+      name: "Tous les produits ont un product_id"
+  - duplicate_count(product_id) = 0:
+      name: "Pas de doublons de product_id"
+  - min(product_weight_g) >= 0:
+      name: "Poids produit non negatif"
+      warn: true
+  - min(product_length_cm) >= 0:
+      name: "Longueur produit non negative"
+      warn: true

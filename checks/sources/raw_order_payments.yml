@@ -1,0 +1,12 @@
+checks for raw_order_payments:
+  - row_count > 100000:
+      name: "Volume de paiements attendu"
+  - missing_count(order_id) = 0:
+      name: "Tous les paiements ont un order_id"
+  - missing_count(payment_type) = 0:
+      name: "Tous les paiements ont un type"
+  - min(payment_value) >= 0:
+      name: "Pas de montant de paiement negatif"
+  - max(payment_installments) < 30:
+      name: "Nombre d'echeances plausible (<30)"
+      warn: true

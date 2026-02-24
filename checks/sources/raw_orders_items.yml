@@ -1,9 +1,12 @@
 checks for raw_order_items:
   - row_count > 100000:
       name: "Volume de lignes attendu"
-  - missing_count(order_id) = 0
-  - missing_count(product_id) = 0
-  - missing_count(seller_id) = 0
+  - missing_count(order_id) = 0:
+      name: "Toutes les lignes ont une commande"
+  - missing_count(product_id) = 0:
+      name: "Toutes les lignes ont un produit"
+  - missing_count(seller_id) = 0:
+      name: "Toutes les lignes ont un vendeur"
   - min(price) >= 0:
       name: "Pas de prix négatifs"
   - min(freight_value) >= 0:
@@ -11,3 +14,6 @@ checks for raw_order_items:
   - max(price) < 10000:
       name: "Pas de prix aberrants (>10k BRL)"
       warn: true # Alerte mais ne bloque pas
+  - max(freight_value) < 500:
+      name: "Pas de frais de port aberrants (>500 BRL)"
+      warn: true
