@@ -1,0 +1,21 @@
+sources:
+  - name: raw
+    description: "Tables brutes Olist chargees dans DuckDB (schema main)."
+    schema: main
+    tables:
+      - name: raw_orders
+        description: "Commandes Olist avec statuts et jalons logistiques."
+      - name: raw_order_items
+        description: "Lignes de commande (produit, vendeur, prix, fret)."
+      - name: raw_order_payments
+        description: "Paiements par commande (type, echeances, montant)."
+      - name: raw_order_reviews
+        description: "Avis clients et notes post-achat."
+      - name: raw_customers
+        description: "Referentiel clients et localisation client."
+      - name: raw_products
+        description: "Referentiel produits avec attributs physiques."
+      - name: raw_sellers
+        description: "Referentiel vendeurs et localisation vendeur."
+      - name: raw_geolocation
+        description: "Geolocalisation par prefixe de code postal."

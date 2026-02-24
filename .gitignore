@@ -12,6 +12,7 @@ build/
 .venv/
 venv/
 ENV/
+.direnv/
 
 # IDE / Editors
 .vscode/
@@ -34,8 +35,8 @@ Thumbs.db
 data/raw/
 data/processed/
 *.parquet
-*.db
 *.duckdb
+*.db
 
 # dbt
 target/

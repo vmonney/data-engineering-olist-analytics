@@ -11,6 +11,18 @@ This project uses two complementary quality layers:
 - dbt enforces schema assumptions and relational integrity in transformed models
 - Together they provide fast detection (Soda) and robust modeling guarantees (dbt)
 
+## Responsibility split (avoid duplication)
+
+- Soda owns raw and mart monitoring:
+  - volume/freshness expectations
+  - plausibility thresholds and warning-level anomaly checks
+  - cross-table reconciliation checks
+- dbt owns transformed model contracts:
+  - primary keys (`unique`, `not_null`)
+  - relationship integrity (`relationships`)
+  - transformed-domain constraints (`accepted_values`)
+- Rule of thumb: if a check protects the pipeline behavior after SQL transformations, keep it in dbt; if it monitors source quality drift or KPI realism over time, keep it in Soda.
+
 ## Soda checks in this project
 
 Source checks live in `checks/sources/` and cover:

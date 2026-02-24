@@ -1,0 +1,112 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "Commandes nettoyees avec timestamps harmonises et metriques de livraison."
+    columns:
+      - name: order_id
+        description: "Identifiant unique de commande."
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Identifiant client rattache a la commande."
+        data_tests:
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: order_status
+        description: "Statut de commande conserve apres filtrage staging."
+        data_tests:
+          - accepted_values:
+              values: ['delivered', 'shipped', 'canceled', 'unavailable', 'invoiced', 'processing']
+      - name: is_late_delivery
+        description: "Flag indiquant une livraison apres date estimee."
+        data_tests:
+          - not_null
+
+  - name: stg_order_items
+    description: "Lignes de commande avec prix, fret et montant total par item."
+    columns:
+      - name: order_id
+        description: "Commande a laquelle la ligne appartient."
+        data_tests:
+          - relationships:
+              to: source('raw', 'raw_orders')
+              field: order_id
+      - name: product_id
+        description: "Produit vendu sur la ligne."
+        data_tests:
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+      - name: seller_id
+        description: "Vendeur associe a la ligne."
+        data_tests:
+          - relationships:
+              to: ref('stg_sellers')
+              field: seller_id
+
+  - name: stg_payments
+    description: "Paiements de commande avec type, nombre d'echeances et montant."
+    columns:
+      - name: order_id
+        description: "Commande reglee par ce paiement."
+        data_tests:
+          - relationships:
+              to: source('raw', 'raw_orders')
+              field: order_id
+
+  - name: stg_reviews
+    description: "Avis clients avec score normalise et metadonnees temporelles."
+    columns:
+      - name: review_id
+        description: "Identifiant de review."
+        data_tests:
+          - not_null
+      - name: order_id
+        description: "Commande evaluee par la review."
+        data_tests:
+          - relationships:
+              to: source('raw', 'raw_orders')
+              field: order_id
+      - name: review_score
+        description: "Note de satisfaction comprise entre 1 et 5."
+        data_tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+
+  - name: stg_customers
+    description: "Clients dedoublonnes avec attributs de localisation normalises."
+    columns:
+      - name: customer_id
+        description: "Cle primaire client technique."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_products
+    description: "Catalogue produit nettoye avec dimensions et poids castes."
+    columns:
+      - name: product_id
+        description: "Cle primaire produit."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_sellers
+    description: "Referentiel vendeurs normalise (ville lowercase et zip en texte)."
+    columns:
+      - name: seller_id
+        description: "Cle primaire vendeur."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_geolocation
+    description: "Points de geolocalisation relies au prefixe postal."
+    columns:
+      - name: zip_code
+        description: "Prefixe de code postal utilise comme cle de rapprochement."
+        data_tests:
+          - not_null
