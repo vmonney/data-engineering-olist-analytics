@@ -1,4 +1,4 @@
 data_source duckdb_raw:
   type: duckdb
-  path: data/olist.duckdb
+  path: "${DUCKDB_PATH:-data/olist.duckdb}"
   read_only: true

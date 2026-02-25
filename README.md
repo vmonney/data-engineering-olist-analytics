@@ -86,6 +86,18 @@ uv run python main.py dagster
 uv run dagster dev -m pipeline.definitions
 ```
 
+## Lineage (dbt docs)
+
+```bash
+uv run dbt docs generate --project-dir olist_dbt/
+uv run dbt docs serve --project-dir olist_dbt/   # → http://localhost:8080
+```
+
+This opens the interactive DAG showing the full lineage:
+`stg_orders → int_orders_enriched → mart_delivery_analysis`
+
+A screenshot of the lineage graph is available in [`docs/lineage.png`](docs/lineage.png) for reviewers who cannot run the project locally.
+
 ## Linting
 
 ```bash

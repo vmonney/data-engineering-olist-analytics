@@ -23,7 +23,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
         with:
-          enable-cache: true
+          enable-cache: false
 
       - name: Install Python dependencies
         run: uv sync
@@ -40,6 +40,9 @@ jobs:
 
       - name: Ingest CSVs into DuckDB
         run: uv run python scripts/ingest_csv_to_parquet.py
+
+      - name: Set DuckDB path
+        run: echo "DUCKDB_PATH=${{ github.workspace }}/data/olist.duckdb" >> $GITHUB_ENV
 
       - name: Run Soda checks on sources
         run: |
@@ -79,9 +82,9 @@ jobs:
         run: uv run ruff check .
 
       - name: Lint SQL (SQLFluff)
+        working-directory: olist_dbt
         run: |
-          uv run sqlfluff lint olist_dbt/models/ \
+          uv run sqlfluff lint models/ \
             --dialect duckdb \
-            --templater dbt \
-            --config olist_dbt/.sqlfluff
+            --templater dbt
         continue-on-error: true
