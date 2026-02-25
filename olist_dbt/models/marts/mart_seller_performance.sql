@@ -17,7 +17,7 @@ SELECT
     ) AS late_delivery_pct,
 
     -- Satisfaction
-    ROUND(AVG(o.review_score), 2) AS avg_review_score,
+    COALESCE(ROUND(AVG(o.review_score), 2), 0.00) AS avg_review_score,
     SUM(CASE WHEN o.review_score <= 2 THEN 1 ELSE 0 END) AS nb_bad_reviews,
 
     -- Catégorisation

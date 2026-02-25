@@ -1,8 +1,8 @@
 WITH customer_metrics AS (
     SELECT
         customer_unique_id,
-        customer_state,
-        customer_city,
+        MIN(customer_state) AS customer_state,
+        MIN(customer_city) AS customer_city,
         COUNT(DISTINCT order_id) AS frequency,
         ROUND(SUM(order_total), 2) AS monetary,
         MAX(purchased_at) AS last_purchase_at,
@@ -13,7 +13,7 @@ WITH customer_metrics AS (
         ROUND(AVG(delivery_days), 1) AS avg_delivery_days
     FROM {{ ref('int_orders_enriched') }}
     WHERE order_status = 'delivered'
-    GROUP BY 1, 2, 3
+    GROUP BY 1
 ),
 
 scored AS (
