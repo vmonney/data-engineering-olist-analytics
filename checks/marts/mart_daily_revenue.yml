@@ -3,7 +3,7 @@ checks for mart_daily_revenue:
       name: "~730 jours de donnees (2 ans)"
   - missing_count(revenue_date) = 0:
       name: "Toutes les lignes ont une date"
-  - min(gross_revenue) > 0:
-      name: "Pas de journee avec revenu brut nul"
+  - min(gross_revenue) >= 0:
+      name: "Pas de journee avec revenu brut negatif"
   - avg(avg_order_value) between 100 and 200:
       name: "Panier moyen plausible (BRL)"

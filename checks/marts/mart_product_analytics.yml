@@ -1,0 +1,19 @@
+checks for mart_product_analytics:
+  - row_count > 1000:
+      name: "Volume de produits analyse suffisant"
+  - missing_count(product_id) = 0:
+      name: "Tous les produits ont un ID"
+  - duplicate_count(product_id) = 0:
+      name: "Unicite du produit dans la mart"
+  - min(total_units_sold) > 0:
+      name: "Quantites vendues strictement positives"
+  - min(total_revenue) > 0:
+      name: "Revenu produit strictement positif"
+  - min(avg_price) > 0:
+      name: "Prix moyen produit strictement positif"
+  - avg(avg_review) between 1 and 5:
+      name: "Note moyenne produit plausible"
+  - min(freight_pct_of_price) >= 0:
+      name: "Pct fret non negatif"
+  - max(freight_pct_of_price) <= 300:
+      name: "Pct fret borne haute plausible (avg_price >= 10 BRL et >= 5 ventes)"

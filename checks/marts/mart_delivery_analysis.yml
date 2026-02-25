@@ -1,0 +1,23 @@
+checks for mart_delivery_analysis:
+  - row_count between 2 and 20:
+      name: "Nombre de segments livraison plausible"
+  - missing_count(delivery_bucket) = 0:
+      name: "Tous les segments livraison sont renseignes"
+  - missing_count(is_late_delivery) = 0:
+      name: "Chaque segment a un statut de retard"
+  - min(nb_orders) > 0:
+      name: "Chaque segment contient au moins une commande"
+  - avg(avg_review_score) between 1 and 5:
+      name: "Note moyenne client plausible"
+  - min(pct_5stars) >= 0:
+      name: "Pct 5 etoiles non negatif"
+  - max(pct_5stars) <= 100:
+      name: "Pct 5 etoiles inferieur ou egal a 100"
+  - min(pct_1star) >= 0:
+      name: "Pct 1 etoile non negatif"
+  - max(pct_1star) <= 100:
+      name: "Pct 1 etoile inferieur ou egal a 100"
+  - min(pct_with_comment) >= 0:
+      name: "Pct commentaires non negatif"
+  - max(pct_with_comment) <= 100:
+      name: "Pct commentaires inferieur ou egal a 100"

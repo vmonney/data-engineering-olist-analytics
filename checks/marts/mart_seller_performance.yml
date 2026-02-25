@@ -1,0 +1,20 @@
+checks for mart_seller_performance:
+  - row_count between 2000 and 4000:
+      name: "Volume de vendeurs attendu"
+  - missing_count(seller_id) = 0:
+      name: "Tous les vendeurs ont un ID"
+  - duplicate_count(seller_id) = 0:
+      name: "Unicite du vendeur dans la mart"
+  - min(total_orders) > 0:
+      name: "Chaque vendeur a au moins une commande"
+  - min(total_revenue) > 0:
+      name: "Revenu vendeur strictement positif"
+  - avg(avg_review_score) between 1 and 5:
+      name: "Note moyenne vendeur plausible"
+  - min(late_delivery_pct) >= 0:
+      name: "Pct retard non negatif"
+  - max(late_delivery_pct) <= 100:
+      name: "Pct retard inferieur ou egal a 100"
+  - invalid_count(seller_tier) = 0:
+      name: "Tiers vendeurs valides"
+      valid values: [Top Performer, Solid, Needs Improvement, Low Volume]
