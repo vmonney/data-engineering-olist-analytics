@@ -15,4 +15,10 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  olist_dbt: {}
+  olist_dbt:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table

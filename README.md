@@ -1,88 +1,95 @@
 # Olist Analytics
 
-End-to-end analytics project built on the Brazilian Olist e-commerce dataset.
-The stack demonstrates ingestion, quality gates, SQL transformation, and BI-ready marts.
+End-to-end analytics pipeline built on the Brazilian Olist e-commerce dataset (100k+ orders, 8 tables).
+Demonstrates ingestion, data quality gates, SQL transformation, and a BI dashboard — fully orchestrated.
 
 ## Stack
 
-- Storage/compute: DuckDB
-- Transform: dbt (`dbt-core` + `dbt-duckdb`)
-- Data quality: Soda Core + dbt tests
-- Python tooling: `uv`
-- Linting: Ruff (Python), SQLFluff (SQL)
+| Tool | Role |
+|------|------|
+| [DuckDB](https://duckdb.org) | Embedded OLAP storage & compute |
+| [dbt](https://docs.getdbt.com) + dbt-duckdb | SQL transformations (staging → intermediate → marts) |
+| [Soda Core](https://docs.soda.io) | Operational data quality checks |
+| [Dagster](https://dagster.io) | Pipeline orchestration, daily schedule |
+| [Evidence](https://evidence.dev) | Markdown-based BI dashboard |
+| [Marimo](https://marimo.io) | Interactive Python notebooks |
+| uv | Python package manager |
+| Ruff + SQLFluff | Python & SQL linting |
 
-## Data Quality (Portfolio Highlights)
+## Quick Start
 
-This project uses two complementary quality layers:
+```bash
+uv sync                                    # install dependencies
+uv run python main.py ingest               # load CSVs → DuckDB
+uv run python main.py transform            # dbt build (run + test)
+uv run python main.py quality              # Soda checks (sources + marts)
+uv run python main.py dagster              # launch Dagster UI → http://localhost:3000
+```
 
-- **Soda Core** for source and mart checks (`checks/sources/`, `checks/marts/`)
-- **dbt tests** for model-level constraints after transformations
+Full setup guide (prerequisites, dataset download, dashboard): [`docs/SETUP.md`](docs/SETUP.md)
 
-What is covered in Soda:
+## CLI
 
-- Source integrity: missing IDs, duplicates, valid domains, plausibility bounds
-- Business reconciliation: delivered orders should have payments; item totals vs payment totals (warning tolerance)
-- Mart protection: expected time-series volume, non-null business keys, KPI plausibility ranges
+`main.py` provides a unified entry point:
 
-Detailed strategy and rationale: `docs/data-quality.md`
+```bash
+uv run python main.py ingest      # CSV → DuckDB raw tables
+uv run python main.py quality     # Soda scans on sources + marts
+uv run python main.py transform   # dbt build (run + test)
+uv run python main.py pipeline    # ingest + quality + transform
+uv run python main.py dagster     # start Dagster UI
+```
+
+## Data Quality
+
+Two complementary layers:
+
+| Layer | Tool | When |
+|-------|------|------|
+| Source checks | Soda Core | After ingestion, before dbt |
+| Model tests | dbt | During `dbt build` |
+| Mart checks | Soda Core | After dbt build |
+
+**Soda** covers: row counts, PK/FK integrity, domain validity, cross-table reconciliation.
+**dbt tests** cover: uniqueness, referential integrity, accepted values, value ranges.
+
+Documented threshold decisions: [`checks/sources/decisions.md`](checks/sources/decisions.md)
+Detailed strategy: [`docs/data-quality.md`](docs/data-quality.md)
 
 ## Quality Runbook
 
-Install dependencies (including dev tools):
-
 ```bash
-uv sync --dev
-```
-
-Run Soda checks on sources:
-
-```bash
+# Soda — sources
 uv run soda scan -d duckdb_raw -c soda/config.yml checks/sources/
-```
 
-Run Soda checks on marts:
+# dbt — run + test
+uv run dbt build --project-dir olist_dbt/
 
-```bash
-# First build marts with dbt
-uv run dbt run --project-dir olist_dbt/
+# Soda — marts
 uv run soda scan -d duckdb_raw -c soda/config.yml checks/marts/
 ```
 
-Run dbt tests:
+## Dashboard (Evidence)
 
 ```bash
-uv run dbt test --project-dir olist_dbt/
+cd evidence-report
+npm install && npm run sources && npm run dev   # → http://localhost:3000
+```
+
+## Orchestration (Dagster)
+
+Pipeline: `ingestion → source checks → dbt build → mart checks → Evidence build`
+
+```bash
+uv run python main.py dagster
+# or directly:
+uv run dagster dev -m pipeline.definitions
 ```
 
 ## Linting
 
-Run Ruff (Python):
-
 ```bash
-uv run ruff check .
-uv run ruff format .
-```
-
-Auto-fix Ruff issues:
-
-```bash
-uv run ruff check . --fix
-```
-
-Run SQLFluff (SQL):
-
-```bash
-uv run sqlfluff lint . --dialect duckdb
-```
-
-Auto-fix SQLFluff issues:
-
-```bash
-uv run sqlfluff fix . --dialect duckdb
-```
-
-Run both linters via pre-commit:
-
-```bash
-uvx pre-commit run --all-files
+uv run ruff check . --fix              # Python
+uv run sqlfluff fix olist_dbt/models/  # SQL
+uvx pre-commit run --all-files         # both via pre-commit
 ```

@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dbt-and-quality:
+    name: dbt build + Soda checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Install Python dependencies
+        run: uv sync
+
+      - name: Download Olist dataset from Kaggle
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          uv run pip install kaggle
+          mkdir -p data/raw/csv
+          uv run kaggle datasets download -d olistbr/brazilian-ecommerce \
+            --unzip -p data/raw/csv
+
+      - name: Ingest CSVs into DuckDB
+        run: uv run python scripts/ingest_csv_to_parquet.py
+
+      - name: Run Soda checks on sources
+        run: |
+          uv run soda scan \
+            -d duckdb_raw \
+            -c soda/config.yml \
+            checks/sources/
+
+      - name: Install dbt packages
+        run: uv run dbt deps --project-dir olist_dbt/
+
+      - name: Run dbt build (run + test)
+        run: uv run dbt build --project-dir olist_dbt/
+
+      - name: Run Soda checks on marts
+        run: |
+          uv run soda scan \
+            -d duckdb_raw \
+            -c soda/config.yml \
+            checks/marts/
+
+      - name: Lint Python (Ruff)
+        run: uv run ruff check .
+
+      - name: Lint SQL (SQLFluff)
+        run: |
+          uv run sqlfluff lint olist_dbt/models/ \
+            --dialect duckdb \
+            --templater dbt \
+            --config olist_dbt/.sqlfluff
+        continue-on-error: true

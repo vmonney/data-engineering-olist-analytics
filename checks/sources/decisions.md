@@ -1,20 +1,21 @@
-# checks/sources/decisions.md
-## Prix > 5000 BRL dans raw_order_items
-- Investigué le 2026-02-23 dans Marimo
-- 3 lignes concernées, produits électroniques haut de gamme ou art
-- Décision : valeurs légitimes, seuil warn maintenu à 10000 BRL
+# Data Quality Threshold Decisions
 
-## Ecart paiement vs total items > 1 BRL
-- Valeur observée: 250 commandes
-- Décision: seuil de contrôle à `< 1000` pour rester strict sans bloquer le pipeline portfolio
-- Raison: dataset public historique avec cas de rounding/remboursements possibles
+## Prices > 5,000 BRL in raw_order_items
+- Investigated on 2026-02-23 in Marimo notebook
+- 3 rows affected: high-end electronics and art items
+- Decision: values are legitimate; warn threshold maintained at 10,000 BRL
 
-## Commandes livrées sans paiement
-- Valeur observée: 1 commande
-- Décision: seuil de contrôle à `< 10`
-- Raison: garder le check sensible tout en tolérant une anomalie isolée du dataset brut
+## Payment vs. item total mismatch > 1 BRL
+- Observed value: 250 orders
+- Decision: control threshold set to `< 1,000` to remain strict without blocking the pipeline
+- Rationale: historical public dataset — rounding differences and partial refunds are expected
 
-## Doublons review_id
-- Valeur observée: 789 `review_id` dupliqués
-- Décision: seuil de contrôle à `< 1000`
-- Raison: anomalie connue du dataset Olist, monitorée mais non bloquante
+## Delivered orders with no recorded payment
+- Observed value: 1 order
+- Decision: control threshold set to `< 10`
+- Rationale: keep the check sensitive while tolerating a single isolated anomaly in the raw dataset
+
+## Duplicate review_id
+- Observed value: 789 duplicate `review_id` values
+- Decision: control threshold set to `< 1,000`
+- Rationale: known artifact of the Olist dataset; monitored but non-blocking

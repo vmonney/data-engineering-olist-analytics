@@ -32,8 +32,14 @@ ORDER BY mois
 ## Impact de la livraison sur la satisfaction
 
 ```sql delivery_impact
-SELECT * FROM mart_delivery_analysis
-WHERE NOT is_late_delivery
+SELECT
+    delivery_bucket,
+    SUM(nb_orders) AS nb_orders,
+    ROUND(
+        SUM(avg_review_score * nb_orders) / NULLIF(SUM(nb_orders), 0), 2
+    ) AS avg_review_score
+FROM mart_delivery_analysis
+GROUP BY delivery_bucket
 ORDER BY delivery_bucket
 ```
 
