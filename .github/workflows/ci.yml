@@ -41,9 +41,6 @@ jobs:
       - name: Ingest CSVs into DuckDB
         run: uv run python scripts/ingest_csv_to_parquet.py
 
-      - name: Set DuckDB path
-        run: echo "DUCKDB_PATH=${{ github.workspace }}/data/olist.duckdb" >> $GITHUB_ENV
-
       - name: Run Soda checks on sources
         run: |
           uv run soda scan \
@@ -60,7 +57,7 @@ jobs:
             outputs:
               dev:
                 type: duckdb
-                path: data/olist.duckdb
+                path: ${{ github.workspace }}/data/olist.duckdb
                 schema: main
                 threads: 4
           EOF

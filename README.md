@@ -1,38 +1,40 @@
 # Olist Analytics
 
-End-to-end analytics pipeline built on the Brazilian Olist e-commerce dataset (100k+ orders, 8 tables).
-Demonstrates ingestion, data quality gates, SQL transformation, and a BI dashboard — fully orchestrated.
+End-to-end analytics engineering project on the Brazilian Olist e-commerce dataset (100k+ orders, 8 source tables), showcasing ingestion, quality gates, SQL modeling, orchestration, and BI delivery.
+
+## Portfolio Highlights
+
+- Built a production-style analytics workflow from raw CSV files to an executive-ready BI layer.
+- Implemented three-layer quality assurance: Soda source checks, dbt model tests, Soda mart checks.
+- Modeled analytics data into staging, intermediate, and marts for reliable downstream reporting.
+- Orchestrated daily execution in Dagster with explicit asset dependencies and failure visibility.
+- Published business-focused dashboard outputs with Evidence over DuckDB marts.
+
+## At a Glance
+
+| Area | Details |
+| --- | --- |
+| Dataset | Olist e-commerce data, 8 CSV files, 100k+ orders |
+| Outcomes | Revenue trends, delivery insights, RFM segmentation, seller and product analytics |
+| Reliability | Source + transformation + mart quality controls with documented thresholds |
+| Orchestration | Dagster asset pipeline, scheduled daily at 06:00 UTC |
 
 ## Stack
 
+| Tool | Role |
+| --- | --- |
+| [DuckDB](https://duckdb.org) | Embedded OLAP storage and compute |
+| [dbt](https://docs.getdbt.com) + dbt-duckdb | SQL transformations and tests |
+| [Soda Core](https://docs.soda.io) | Operational data quality checks |
+| [Dagster](https://dagster.io) | Pipeline orchestration and scheduling |
+| [Evidence](https://evidence.dev) | Markdown-based BI dashboard |
+| [Marimo](https://marimo.io) | Interactive analysis notebooks |
+| uv | Python package management |
+| Ruff + SQLFluff | Python and SQL linting |
 
-| Tool                                        | Role                                                 |
-| ------------------------------------------- | ---------------------------------------------------- |
-| [DuckDB](https://duckdb.org)                | Embedded OLAP storage & compute                      |
-| [dbt](https://docs.getdbt.com) + dbt-duckdb | SQL transformations (staging → intermediate → marts) |
-| [Soda Core](https://docs.soda.io)           | Operational data quality checks                      |
-| [Dagster](https://dagster.io)               | Pipeline orchestration, daily schedule               |
-| [Evidence](https://evidence.dev)            | Markdown-based BI dashboard                          |
-| [Marimo](https://marimo.io)                 | Interactive Python notebooks                         |
-| uv                                          | Python package manager                               |
-| Ruff + SQLFluff                             | Python & SQL linting                                 |
+## Pipeline Flow
 
-
-## Quick Start
-
-```bash
-uv sync                                    # install dependencies
-uv run python main.py ingest               # load CSVs → DuckDB
-uv run python main.py transform            # dbt build (run + test)
-uv run python main.py quality              # Soda checks (sources + marts)
-uv run python main.py dagster              # launch Dagster UI → http://localhost:3000
-```
-
-Full setup guide (prerequisites, dataset download, dashboard): `[docs/SETUP.md](docs/SETUP.md)`
-
-## 🔁 Pipeline Flow
-
-The end-to-end pipeline is orchestrated by **Dagster** and scheduled daily at 06:00 UTC. Each asset depends on the previous one — if a step fails, the pipeline stops and surfaces the error in the Dagster UI.
+The end-to-end flow is orchestrated by Dagster. Each step must pass before the next begins.
 
 ```mermaid
 flowchart TD
@@ -157,160 +159,54 @@ flowchart TD
     class EV,EV_PAGES dash
     class DAG orch
     class GHA,LINT ci
-
 ```
 
+## dbt Model Lineage
 
-
-### Pipeline Steps Detail
-
-
-| Step                   | Asset (Dagster)         | Tool             | What Happens                                                                                                      |
-| ---------------------- | ----------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **1 — Ingestion**      | `raw_parquet_files`     | Python + DuckDB  | 8 Kaggle CSVs → `CREATE TABLE` into `data/olist.duckdb` as `raw_`* tables                                         |
-| **2 — Source Quality** | `source_quality_checks` | Soda Core        | 30+ checks: row counts, PK/FK integrity, domain validity, cross-table reconciliation (payment vs. item totals)    |
-| **3 — Transformation** | `dbt_models`            | dbt + dbt-duckdb | `dbt run` builds 8 staging views → 2 intermediate views → 5 mart tables, then `dbt test` runs schema + data tests |
-| **4 — Mart Quality**   | `mart_quality_checks`   | Soda Core        | 40+ checks on mart tables: KPI plausibility, business key completeness, segment/tier whitelists                   |
-| **5 — Dashboard**      | `evidence_build`        | Evidence.dev     | `npm run build` generates a static BI dashboard from SQL queries over the marts                                   |
-
-
-### dbt Model Lineage
 ![dbt Model Lineage Diagram](docs/lineage.png)
 
-### Data Quality Architecture
-
-The project enforces quality at **three checkpoints** — before, during, and after transformation:
-
-```
-CSV files
-  │
-  ▼
-┌─────────────────────────┐
-│  SODA — Source Checks   │  checks/sources/  ·  30+ checks
-│  • Row counts & volume  │  • PK uniqueness
-│  • Domain validation    │  • Cross-table reconciliation
-│  • Outlier warnings     │  • Documented threshold decisions
-└────────────┬────────────┘
-             │ pass
-             ▼
-┌─────────────────────────┐
-│  dbt — Model Tests      │  _staging.yml, _intermediate.yml, _marts.yml
-│  • unique / not_null    │  • relationships (FK integrity)
-│  • accepted_values      │  • dbt_expectations (value ranges)
-└────────────┬────────────┘
-             │ pass
-             ▼
-┌─────────────────────────┐
-│  SODA — Mart Checks     │  checks/marts/  ·  40+ checks
-│  • KPI plausibility     │  • Segment whitelists
-│  • Business key nulls   │  • Percentage bounds (0–100)
-│  • Time-series volume   │  • Avg order value range
-└─────────────────────────┘
-
-```
-
-Threshold decisions are documented in `checks/sources/decisions.md`, explaining **why** each tolerance was chosen (e.g., 789 duplicate `review_id` values tolerated as a known dataset artifact).
-
-### Tech Stack Map
-
-```
-┌───────────────────────────────────────────────────────┐
-│                    ORCHESTRATION                       │
-│              Dagster · daily @ 06:00 UTC               │
-├─────────┬──────────┬──────────┬──────────┬────────────┤
-│ Ingest  │ Quality  │Transform │ Quality  │ Dashboard  │
-│ Python  │ Soda     │ dbt +    │ Soda     │ Evidence   │
-│ DuckDB  │ Core     │ duckdb   │ Core     │ .dev       │
-├─────────┴──────────┴──────────┴──────────┴────────────┤
-│                     STORAGE                            │
-│            DuckDB  ·  data/olist.duckdb                │
-├───────────────────────────────────────────────────────┤
-│                    DEV TOOLS                           │
-│  uv (packages) · Ruff + SQLFluff (lint) · pre-commit  │
-│  GitHub Actions (CI) · Marimo (exploration)            │
-└───────────────────────────────────────────────────────┘
-
-```
-
-
-
-## CLI
-
-`main.py` provides a unified entry point:
+## Quick Start
 
 ```bash
-uv run python main.py ingest      # CSV → DuckDB raw tables
-uv run python main.py quality     # Soda scans on sources + marts
-uv run python main.py transform   # dbt build (run + test)
-uv run python main.py pipeline    # ingest + quality + transform
-uv run python main.py dagster     # start Dagster UI
-```
-
-## Data Quality
-
-Two complementary layers:
-
-
-| Layer         | Tool      | When                        |
-| ------------- | --------- | --------------------------- |
-| Source checks | Soda Core | After ingestion, before dbt |
-| Model tests   | dbt       | During `dbt build`          |
-| Mart checks   | Soda Core | After dbt build             |
-
-
-**Soda** covers: row counts, PK/FK integrity, domain validity, cross-table reconciliation.
-**dbt tests** cover: uniqueness, referential integrity, accepted values, value ranges.
-
-Documented threshold decisions: `[checks/sources/decisions.md](checks/sources/decisions.md)`
-Detailed strategy: `[docs/data-quality.md](docs/data-quality.md)`
-
-## Quality Runbook
-
-```bash
-# Soda — sources
-uv run soda scan -d duckdb_raw -c soda/config.yml checks/sources/
-
-# dbt — run + test
-uv run dbt build --project-dir olist_dbt/
-
-# Soda — marts
-uv run soda scan -d duckdb_raw -c soda/config.yml checks/marts/
-```
-
-## Dashboard (Evidence)
-
-```bash
-cd evidence-report
-npm install && npm run sources && npm run dev   # → http://localhost:3000
-```
-
-## Orchestration (Dagster)
-
-Pipeline: `ingestion → source checks → dbt build → mart checks → Evidence build`
-
-```bash
+uv sync
+uv run python main.py ingest
+uv run python main.py transform
+uv run python main.py quality
 uv run python main.py dagster
-# or directly:
-uv run dagster dev -m pipeline.definitions
 ```
 
-## Lineage (dbt docs)
+Full environment and dataset setup: [`docs/SETUP.md`](docs/SETUP.md)
+
+## Run and Validate
 
 ```bash
-uv run dbt docs generate --project-dir olist_dbt/
-uv run dbt docs serve --project-dir olist_dbt/   # → http://localhost:8080
+# Full pipeline
+uv run python main.py pipeline
+
+# Dashboard (local)
+cd evidence-report
+npm install
+npm run sources
+npm run dev
+
+# Linting
+uv run ruff check . --fix
+uv run sqlfluff fix olist_dbt/models/
+uvx pre-commit run --all-files
 ```
 
-This opens the interactive DAG showing the full lineage:
-`stg_orders → int_orders_enriched → mart_delivery_analysis`
+## Data Quality Strategy
 
-A screenshot of the lineage graph is available in `[docs/lineage.png](docs/lineage.png)` for reviewers who cannot run the project locally.
+| Layer | Tool | Purpose |
+| --- | --- | --- |
+| Source checks | Soda Core | Validate raw ingestion quality before transformations |
+| Model tests | dbt | Enforce schema correctness and relational integrity during build |
+| Mart checks | Soda Core | Validate KPI plausibility and business-rule compliance |
 
-## Linting
+Threshold rationale is documented in [`checks/sources/decisions.md`](checks/sources/decisions.md).
 
-```bash
-uv run ruff check . --fix              # Python
-uv run sqlfluff fix olist_dbt/models/  # SQL
-uvx pre-commit run --all-files         # both via pre-commit
-```
+## Deep Dive
 
+- Setup and local runbook: [`docs/SETUP.md`](docs/SETUP.md)
+- Quality architecture and rationale: [`docs/data-quality.md`](docs/data-quality.md)
+- Threshold decisions for source checks: [`checks/sources/decisions.md`](checks/sources/decisions.md)
