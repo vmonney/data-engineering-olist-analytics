@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: int_orders_enriched
+    description: "Vue intermediaire enrichie au niveau commande avec montants, paiement principal et satisfaction."
+    columns:
+      - name: order_id
+        description: "Identifiant unique de commande au grain 1 ligne = 1 commande."
+        data_tests:
+          - unique
+          - not_null
+      - name: total_paid
+        description: "Somme des paiements enregistres pour la commande."
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 200000
+
+  - name: int_delivery_performance
+    description: "Agregat de performance livraison au niveau vendeur et etat client pour commandes livrees."
+    columns:
+      - name: seller_id
+        description: "Identifiant vendeur de l'agregation."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_sellers')
+              field: seller_id
+      - name: customer_state
+        description: "Etat client du segment de livraison."
+        data_tests:
+          - not_null
+      - name: avg_delivery_days
+        description: "Delai moyen de livraison en jours."
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 210
+      - name: late_pct
+        description: "Part des commandes en retard en pourcentage."
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100

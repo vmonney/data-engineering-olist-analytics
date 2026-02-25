@@ -12,9 +12,17 @@ models:
       - name: customer_id
         description: "Identifiant client rattache a la commande."
         data_tests:
+          - not_null
           - relationships:
               to: ref('stg_customers')
               field: customer_id
+      - name: delivery_days
+        description: "Nombre de jours entre achat et livraison effective."
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 210
+              row_condition: "order_status = 'delivered'"
       - name: order_status
         description: "Statut de commande conserve apres filtrage staging."
         data_tests:
@@ -31,15 +39,23 @@ models:
       - name: order_id
         description: "Commande a laquelle la ligne appartient."
         data_tests:
+          - not_null
           - relationships:
               to: source('raw', 'raw_orders')
               field: order_id
       - name: product_id
         description: "Produit vendu sur la ligne."
         data_tests:
+          - not_null
           - relationships:
               to: ref('stg_products')
               field: product_id
+      - name: item_price
+        description: "Prix unitaire de la ligne de commande."
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 10000
       - name: seller_id
         description: "Vendeur associe a la ligne."
         data_tests:
