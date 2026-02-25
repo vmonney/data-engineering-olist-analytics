@@ -48,6 +48,20 @@ jobs:
             -c soda/config.yml \
             checks/sources/
 
+      - name: Create dbt profile for CI
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<'EOF'
+          olist_dbt:
+            target: dev
+            outputs:
+              dev:
+                type: duckdb
+                path: data/olist.duckdb
+                schema: main
+                threads: 4
+          EOF
+
       - name: Install dbt packages
         run: uv run dbt deps --project-dir olist_dbt/
 
