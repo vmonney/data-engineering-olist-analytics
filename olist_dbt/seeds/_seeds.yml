@@ -1,0 +1,15 @@
+version: 2
+
+seeds:
+  - name: product_category_name_translation
+    description: "Mapping officiel categorie produit (pt) -> categorie anglaise."
+    columns:
+      - name: product_category_name
+        description: "Nom de categorie produit source (portugais)."
+        data_tests:
+          - unique
+          - not_null
+      - name: product_category_name_english
+        description: "Nom de categorie traduit en anglais."
+        data_tests:
+          - not_null

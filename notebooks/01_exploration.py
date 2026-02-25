@@ -185,7 +185,7 @@ def _(con, mo, raw_order_items, raw_products):
 
 
 @app.cell
-def _(con, mo, products_categories, raw_order_items, raw_products):
+def _(con, mo, product_category_name_translation, raw_order_items, raw_products):
     _df = mo.sql(
         """
         SELECT DISTINCT
@@ -194,7 +194,7 @@ def _(con, mo, products_categories, raw_order_items, raw_products):
         FROM raw_order_items AS roi
         JOIN raw_products AS p
             ON p.product_id = roi.product_id
-        JOIN products_categories AS pc
+        JOIN product_category_name_translation AS pc
             ON pc.product_category_name = p.product_category_name
         WHERE roi.price > 5000
         ORDER BY pc.product_category_name_english;

@@ -109,6 +109,8 @@ models:
         data_tests:
           - unique
           - not_null
+      - name: product_category_name
+        description: "Categorie produit standardisee en anglais via seed de traduction."
 
   - name: stg_sellers
     description: "Referentiel vendeurs normalise (ville lowercase et zip en texte)."

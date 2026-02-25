@@ -20,8 +20,15 @@ From the repository root:
 
 ```bash
 uv run dbt parse --project-dir olist_dbt/
+uv run dbt seed --project-dir olist_dbt/
 uv run dbt run --project-dir olist_dbt/
 uv run dbt test --project-dir olist_dbt/
+```
+
+Or run everything in one command:
+
+```bash
+uv run dbt build --project-dir olist_dbt/
 ```
 
 Run only staging models:
