@@ -1,6 +1,6 @@
 # olist_dbt
 
-dbt transformation project for the Olist analytics portfolio.
+dbt transformation module for the Olist analytics portfolio.
 
 ## Model layers
 
@@ -8,34 +8,26 @@ dbt transformation project for the Olist analytics portfolio.
 - `models/intermediate/`: business-enriched joins and reusable logic
 - `models/marts/`: analytics-ready tables for BI and portfolio dashboards
 
-## Quality approach
-
-- Use dbt tests for model contracts (keys, relationships, accepted values)
-- Use Soda checks for source/mart monitoring (volume, plausibility, cross-table controls)
-- Detailed rationale: `../docs/data-quality.md`
-
-## Runbook
+## dbt run commands
 
 From the repository root:
 
 ```bash
 uv run dbt parse --project-dir olist_dbt/
-uv run dbt seed --project-dir olist_dbt/
-uv run dbt run --project-dir olist_dbt/
-uv run dbt test --project-dir olist_dbt/
-```
-
-Or run everything in one command:
-
-```bash
 uv run dbt build --project-dir olist_dbt/
 ```
 
-Run only staging models:
+Run by layer:
 
 ```bash
 uv run dbt run --project-dir olist_dbt/ --select staging
 uv run dbt test --project-dir olist_dbt/ --select staging
+
+uv run dbt run --project-dir olist_dbt/ --select intermediate
+uv run dbt test --project-dir olist_dbt/ --select intermediate
+
+uv run dbt run --project-dir olist_dbt/ --select marts
+uv run dbt test --project-dir olist_dbt/ --select marts
 ```
 
 Generate docs:
@@ -45,7 +37,12 @@ uv run dbt docs generate --project-dir olist_dbt/
 uv run dbt docs serve --project-dir olist_dbt/
 ```
 
-## Notes
+## dbt-specific caveats
 
 - `stg_orders` intentionally excludes `created` and `approved` statuses.
-- Some relationship tests reference `source('raw', 'raw_orders')` to stay consistent with this filtering choice.
+- Some relationship tests reference `source('raw', 'raw_orders')` to stay consistent with that filtering choice.
+
+## Related docs
+
+- Project setup and full pipeline: `../docs/SETUP.md`
+- Data quality design and rationale: `../docs/data-quality.md`

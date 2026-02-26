@@ -69,4 +69,4 @@ coverage.xml
 .mypy_cache/
 
 # Internal planning docs (not for public repo)
-olist-portfolio-project-plan.md
+PROJECT_TEMPLATE_GUIDE.md
